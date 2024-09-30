@@ -2,14 +2,17 @@ library(tidyverse)
 library(here)
 
 extdata_dir <- file.path(here(), 'extdata')
-if (!file.exists(extdata_dir)) {
-  dir.create(extdata_dir)
+fixture_dir <- file.path(here(), 'tests', 'testthat', 'fixtures')
+for (dir in c(extdata_dir, fixture_dir)) {
+  if (!file.exists(dir)) {
+    dir.create(dir)
+  }
 }
 
 # make an initial mini network
 set.seed(253)
 num_nodes <- 30
-tmp_node_data <- data.frame(
+tmp_node_data <- tibble::tibble(
   node_idx = 0:(num_nodes - 1),
   id = 0:(num_nodes - 1),
   gene_id = sprintf('ENSTEST%011d', seq_len(num_nodes)),
@@ -18,6 +21,10 @@ tmp_node_data <- data.frame(
 )
 
 write_csv(tmp_node_data, file = file.path(extdata_dir, 'nodes-test-mini.csv'))
+write_rds(tmp_node_data, file = file.path(fixture_dir, 'nodes-mini.rds'))
+# make a csv file that has no node idx column
+write_csv(dplyr::select(tmp_node_data, -node_idx),
+          file = file.path(fixture_dir, 'nodes-no-idx.csv'))
 
 add_edges <- function(edges, source, target, weights) {
   if (length(target) != length(source) | length(weights) != length(source)) {
@@ -91,6 +98,13 @@ tmp_edge_data <- tmp_edge_data[ tmp_edge_data$source != tmp_edge_data$target, ]
 tmp_edge_data <- tmp_edge_data[ rownames(unique(tmp_edge_data[, c('source', 'target')])), ]
 
 write_csv(tmp_edge_data, file = file.path(extdata_dir, 'edges-test-mini.csv'))
+write_rds(tibble::as_tibble(tmp_edge_data),
+          file = file.path(fixture_dir, 'edges-mini.rds'))
+# make a csv file that has no source or target column
+write_csv(dplyr::select(tmp_edge_data, -c(source)),
+          file = file.path(fixture_dir, 'edges-no-source.csv'))
+write_csv(dplyr::select(tmp_edge_data, -c(source, target)),
+          file = file.path(fixture_dir, 'edges-no-source-target.csv'))
 
 set.seed(652)
 num_nodes <- 1000

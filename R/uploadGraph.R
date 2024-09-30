@@ -67,7 +67,7 @@ uploadGraphServer <- function(id, debug = FALSE) {
     # load node data from file
     init_nodes <- reactive({
       req(nodes_file())
-      load_nodes_file(nodes_file())
+      load_node_data(nodes_file())
     })
 
     # return edges file path depending on whether the test data checkbox is checked
@@ -85,7 +85,7 @@ uploadGraphServer <- function(id, debug = FALSE) {
     # load edges data from file
     init_edges <- reactive({
       req(edges_file())
-      edges <- load_edges_file(edges_file())
+      edges <- load_edge_data(edges_file())
       if (debug) {
         message("Loaded edges file:")
         print(head(edges))
@@ -101,27 +101,59 @@ uploadGraphServer <- function(id, debug = FALSE) {
   })
 }
 
-load_nodes_file <- function(file_path) {
-  load_data(file_path)
+#' Load Node data
+#'
+#' \code{load_node_data} loads the nodes file and checks it contains the
+#' minimum required columns (node_idx)
+#'
+#' @param data_file Name of file to load
+#' @param ... Other arguments passed on to the [readr] functions
+#'
+#' @return tibble The loaded data
+#'
+load_node_data <- function(file_path, ...) {
+  node_df <- load_data(file_path, ...)
+  if (!("node_idx" %in% colnames(node_df))) {
+    rlang::abort("No column 'node_idx'! This is a required column.",
+                 class = "error_missing_column")
+  }
+  return(node_df)
 }
 
-load_edges_file <- function(file_path) {
-  load_data(file_path)
+#' Load Edge data
+#'
+#' \code{load_edge_data} loads the edges file and checks it contains the
+#' minimum required columns (source, target)
+#'
+#' @param data_file Name of file to load
+#' @param ... Other arguments passed on to the [readr] functions
+#'
+#' @return tibble The loaded data
+#'
+load_edge_data <- function(file_path, ...) {
+  edge_df <- load_data(file_path, ...)
+  required_cols <- c("source", "target")
+  if (any(!required_cols %in% colnames(edge_df))) {
+    missing_cols <- c("source", "target")[!required_cols %in% colnames(edge_df)]
+    rlang::abort(paste("Missing columns:", paste0(missing_cols, collapse = ", ")),
+                 class = "error_missing_column")
+  }
+  return(edge_df)
 }
 
 #' Load data
 #'
 #' \code{load_data} is the underlying function used to load data
-#' It automatically detects the delimiter based on the filename and uses the
+#' It automatically detects the delimiter based on the file name and uses the
 #' appropriate [readr] function.
 #' Possibilities are [readr::read_csv()], [readr::read_tsv()] or [readr::readr_delim()]
 #' [readr::read_delim()] will require the delimiter passing in as an argument to
-#' [load_nodes_file()] or [load_edges_file()]
+#' [load_node_data()] or [load_edge_data()]
 #'
 #' @param data_file Name of file to load
 #' @param ... Other arguments passed on to the [readr] functions
 #'
-#' @return data.frame The loaded data
+#' @return tibble The loaded data
 #'
 load_data <- function(data_file, ...) {
   if (sub("\\.gz$", "", data_file) |> (\(x) grepl("\\.tsv", x))()) {
@@ -151,7 +183,7 @@ load_data <- function(data_file, ...) {
 #'
 #' @param data_file Name of file to open
 #'
-#' @return data.frame
+#' @return a readr::cols specification
 #'
 #' @examples
 #' data <- standardise_colnames('test_data.tsv')
