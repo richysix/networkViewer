@@ -22,12 +22,28 @@ myApp <- function(testing = FALSE, debug = FALSE) {
             uploadRNASeqInput("rnaseqData")
           ),
           mainPanel(
-            uploadRNASeqOutput("rnaseqData"),
             # file output for testing
             h3("Nodes:"),
             tableOutput("nodes"),
             h3("Edges:"),
-            tableOutput("edges")
+            tableOutput("edges"),
+            uploadRNASeqOutput("rnaseqData"),
+          )
+        )
+      ),
+      tabPanel(
+        "Gene Data",
+        sidebarLayout(
+          sidebarPanel(
+            countPlotInput("gene1"),
+            hr(),
+            countXYScatterPlotInput("xy_scatter")
+          ),
+          mainPanel(
+            h3("Count Plot"),
+            countPlotOutput("gene1"),
+            h3("XY scatterplot"),
+            countXYScatterPlotOutput("xy_scatter")
           )
         )
       ),
@@ -43,6 +59,22 @@ myApp <- function(testing = FALSE, debug = FALSE) {
     output$counts <- renderTable(rnaseq_data_list$counts()[1:5,1:10])
     output$metadata <- renderTable(rnaseq_data_list$gene_metadata()[1:5,])
 
+    selected_gene <- countPlotServer(
+      id = "gene1",
+      counts = rnaseq_data_list$counts,
+      sample_info = rnaseq_data_list$sample_info,
+      gene_metadata = rnaseq_data_list$gene_metadata,
+      debug = debug
+    )
+
+    countXYScatterPlotServer(
+      "xy_scatter",
+      counts = rnaseq_data_list$counts,
+      sample_info = rnaseq_data_list$sample_info,
+      gene_metadata = rnaseq_data_list$gene_metadata,
+      gene1 = selected_gene$gene1,
+      debug = debug
+    )
   }
   shinyApp(ui, server)
 }
