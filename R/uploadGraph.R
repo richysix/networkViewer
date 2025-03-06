@@ -274,37 +274,3 @@ uploadGraphApp <- function(debug = FALSE) {
 # This is free software, licensed under:
 #
 #  The GNU General Public License, Version 3, June 2007
-
-
-#' #' Create Output to display uploaded sample and count data
-#' #'
-#' #' `uploadRNASeqOutput()` produces three table outputs for displaying
-#' #' the data returned by the `uploadRNASeqServer()` function. The three
-#' #' outputs are labelled samples, counts and metadata. There are also two
-#' #' [shinyBS::bsAlert()] anchor points to alert the user to missing data in
-#' #' either the sample or count file
-#' #'
-#' #' @param id namespace id for the UI components. Must match the id provided to the
-#' #' [uploadRNASeqServer()] function.
-#' #'
-#' #' @returns a [htmltools::tagList()] containing three [shiny::tableOutput()]s
-#' #' and two [shinyBS::bsAlert()] anchor points.
-#' #'
-#' #' @export
-#' #'
-#' #' @examples
-#' #'
-#' #' uploadRNASeqOutput("rnaseqData")
-#' #'
-#' uploadRNASeqOutput <- function(id) {
-#'   tagList(
-#'     h3("Sample Data:"),
-#'     shinyBS::bsAlert(NS(id, "countsInputAlert")),
-#'     tableOutput("samples"),
-#'     h3("Count Data:"),
-#'     shinyBS::bsAlert(NS(id, "sampleInputAlert")),
-#'     tableOutput("counts"),
-#'     h3("Gene Metadata:"),
-#'     tableOutput("metadata")
-#'   )
-#' }
