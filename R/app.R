@@ -59,6 +59,7 @@ myApp <- function(testing = FALSE, debug = FALSE) {
     )
   )
   server <- function(input, output, session) {
+    options(shiny.maxRequestSize = 50*1024^2)
     if (testing) {
       output$testing_msgs <-
         renderPrint({
@@ -75,9 +76,28 @@ myApp <- function(testing = FALSE, debug = FALSE) {
 
     rnaseq_data_list <- uploadRNASeqServer(id = "rnaseqData", testing = testing,
                                            debug = debug)
-    output$samples <- renderTable(rnaseq_data_list$sample_info()[1:5,1:5])
-    output$counts <- renderTable(rnaseq_data_list$counts()[1:5,1:10])
-    output$metadata <- renderTable(rnaseq_data_list$gene_metadata()[1:5,])
+
+    output$samples <- renderTable({
+      req(rnaseq_data_list$sample_info())
+      samples <- rnaseq_data_list$sample_info()
+      max_width <- 5
+      n_cols <- ifelse(ncol(samples) > max_width, max_width, ncol(samples))
+      samples[1:5,seq_len(n_cols)]
+    })
+    output$counts <- renderTable({
+      req(rnaseq_data_list$counts())
+      counts <- rnaseq_data_list$counts()
+      max_width <- 10
+      n_cols <- ifelse(ncol(counts) > max_width, max_width, ncol(counts))
+      counts[1:5,seq_len(n_cols)]
+    })
+    output$metadata <- renderTable({
+      req(rnaseq_data_list$gene_metadata())
+      gene_metadata <- rnaseq_data_list$gene_metadata()
+      max_width <- 5
+      n_cols <- ifelse(ncol(gene_metadata) > max_width, max_width, ncol(gene_metadata))
+      gene_metadata[1:5,seq_len(n_cols)]
+    })
 
     selected_gene <- countPlotServer(
       id = "gene1",
