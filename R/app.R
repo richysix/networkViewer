@@ -36,6 +36,13 @@ myApp <- function(testing = FALSE, debug = FALSE) {
         )
       ),
       tabPanel(
+        "Cluster View",
+        page_fillable(
+          subsetGraphInput("cluster_closeup"),
+          subsetGraphOutput("cluster_closeup")
+        )
+      ),
+      tabPanel(
         "Gene Data",
         card(
           card_header("Count Plot"),
@@ -74,6 +81,15 @@ myApp <- function(testing = FALSE, debug = FALSE) {
     output$nodes <- renderTable(data_list$nodes()[1:5,])
     output$edges <- renderTable(data_list$edges()[1:5,])
 
+    # Cluster View
+    subset_list <- subsetGraphServer(
+      id = "cluster_closeup",
+      nodes = data_list$nodes,
+      edges = data_list$edges,
+      debug = debug
+    )
+
+    # TODO: remove genes with all zeros
     rnaseq_data_list <- uploadRNASeqServer(id = "rnaseqData", testing = testing,
                                            debug = debug)
 
