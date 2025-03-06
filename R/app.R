@@ -2,6 +2,7 @@ library(shiny)
 library(r2d3)
 library(shinyModules)
 library(bslib)
+library(DT)
 
 myApp <- function(testing = FALSE, debug = FALSE) {
   ui <- tagList(
@@ -49,7 +50,11 @@ myApp <- function(testing = FALSE, debug = FALSE) {
             sidebar = countXYScatterPlotInput(id = "xy_scatter", hide_x = TRUE),
             countXYScatterPlotOutput("xy_scatter")
           )
-        )
+        ),
+        card(
+          card_header("Count values"),
+          DTOutput("count_data"),
+        ),
       ),
     )
   )
@@ -82,7 +87,7 @@ myApp <- function(testing = FALSE, debug = FALSE) {
       debug = debug
     )
 
-    countXYScatterPlotServer(
+    plot_data_list <- countXYScatterPlotServer(
       "xy_scatter",
       counts = rnaseq_data_list$counts,
       sample_info = rnaseq_data_list$sample_info,
@@ -90,6 +95,12 @@ myApp <- function(testing = FALSE, debug = FALSE) {
       gene1 = selected_gene$gene1,
       debug = debug
     )
+
+    output$count_data <- renderDT(
+      plot_data_list$plot_data(),
+      options = list(pageLength = nrow(plot_data_list$plot_data()))
+    )
+
   }
   shinyApp(ui, server)
 }
