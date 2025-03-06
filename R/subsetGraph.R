@@ -37,7 +37,7 @@ subsetGraphInput <- function(id) {
 #'
 subsetGraphOutput <- function(id) {
   tagList(
-    networkD3Output(NS(id, "cluster_subset_graph"))
+    graphD3Output(NS(id, "cluster_subset_graph"))
   )
 }
 
@@ -93,7 +93,7 @@ subsetGraphServer <- function(id, nodes = NULL, edges = NULL, debug = FALSE) {
     })
 
     # draw network
-    networkD3Server(
+    graphD3Server(
       "cluster_subset_graph",
       nodes = nodes_subset,
       edges = edges_subset,
