@@ -5,16 +5,14 @@ const debug = true;
 let radius = 10;
 const scale = d3.scaleOrdinal(d3.schemeTableau10);
 
-var simulation = d3.forceSimulation()
-    .force("link", d3.forceLink().id(function(d) { return d.node_idx; }))
-    .force("charge", d3.forceManyBody())
-    .force("center", d3.forceCenter(width / 2, height / 2));
-
 r2d3.onRender(function(graph, svg, width, height, options) {
     // Define the div for the tooltip
     // var tooltip_div = svg.append("div")
     //     .attr("class", "tooltip")
     //     .style("opacity", 1);
+
+    // First remove all previous elements
+    svg.selectAll("g").remove();
 
     //draw lines for the links
     const links = svg.append("g")
@@ -33,7 +31,8 @@ r2d3.onRender(function(graph, svg, width, height, options) {
         .data(graph.nodes)
         .join("circle")
         .attr("r", radius)
-        // .attr("fill", node_unselected_color)
+        .attr("cx", width / 2)
+        .attr("cy", height / 2)
         .attr("fill",
             function(d) {
                 if (d.cluster_id == 1) {
@@ -82,6 +81,11 @@ r2d3.onRender(function(graph, svg, width, height, options) {
         nodes.attr("cursor", "grab");
     }
 
+    const simulation = d3.forceSimulation()
+      .force("link", d3.forceLink().id(function(d) { return d.node_idx; }))
+      .force("charge", d3.forceManyBody())
+      .force("center", d3.forceCenter(width / 2, height / 2));
+
     simulation
     .nodes(graph.nodes)
     .on("tick", ticked);
@@ -92,8 +96,8 @@ r2d3.onRender(function(graph, svg, width, height, options) {
     function ticked() {
       //constrains the nodes to be within a box
       nodes
-        .attr("cx", function(d) { return d.x = Math.max(radius, Math.min(width - radius, d.x)); })
-        .attr("cy", function(d) { return d.y = Math.max(radius, Math.min(height - radius, d.y)); });
+        .attr("cx", function(d) { return Math.max(radius, Math.min(width - radius, d.x)); })
+        .attr("cy", function(d) { return Math.max(radius, Math.min(height - radius, d.y)); });
 
       links
           .attr("x1", function(d) { return d.source.x; })
@@ -101,9 +105,6 @@ r2d3.onRender(function(graph, svg, width, height, options) {
           .attr("x2", function(d) { return d.target.x; })
           .attr("y2", function(d) { return d.target.y; });
 
-      nodes
-          .attr("cx", function(d) { return d.x; })
-          .attr("cy", function(d) { return d.y; });
     }
 
     // Colours
