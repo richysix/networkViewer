@@ -138,24 +138,23 @@ create_overview_nodes <- function(nodes) {
 #' create_overview_nodes(edges)
 #'
 create_overview_edges <- function(nodes, edges) {
-  cluster_ids <- unique(nodes$cluster_id)
+  cluster_lookup <- nodes$cluster_id
+  names(cluster_lookup) <- nodes$node_idx
 
-  id_combos <- tidyr::expand_grid(cluster_id1 = cluster_ids, cluster_id2 = cluster_ids) |>
-    dplyr::filter(cluster_id1 < cluster_id2)
-  purrr::map2(
-    id_combos$cluster_id1,
-    id_combos$cluster_id2,
-    function(cluster_id1, cluster_id2) {
-      return(data.frame(
-        source = cluster_id1,
-        target = cluster_id2,
-        weight = count_edges(cluster_id1, cluster_id2, nodes, edges)
-      ))
-    }
-  ) |>
-    purrr::list_rbind() |>
-    dplyr::filter(weight > 0) |>
-    dplyr::mutate(edge_idx = seq_along(source))
+  edges$source_cluster <- unname(cluster_lookup[ as.character(edges$source) ])
+  edges$target_cluster <- unname(cluster_lookup[ as.character(edges$target) ])
+  dplyr::filter(edges, source_cluster != target_cluster) |>
+    dplyr::group_by(source_cluster, target_cluster) |>
+    dplyr::summarise(weight = length(source), .groups = "drop") |>
+    dplyr::mutate(source = dplyr::case_when(
+      source_cluster < target_cluster ~ source_cluster,
+      TRUE ~ target_cluster
+    ), target = dplyr::case_when(
+      source_cluster < target_cluster ~ target_cluster,
+      TRUE ~ source_cluster
+    )) |>
+    dplyr::group_by(source, target) |>
+    dplyr::summarise(weight = sum(weight), .groups = "drop")
 }
 
 # Function to count the edges from one cluster to another
