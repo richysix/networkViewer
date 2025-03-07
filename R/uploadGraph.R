@@ -220,6 +220,8 @@ set_col_types <- function(data_file, readr_func, ...){
         return(readr::col_character())
       } else if (types_for_cols[[colname]] == "d") {
         return(readr::col_double())
+      } else if (types_for_cols[[colname]] == "l") {
+        return(readr::col_logical())
       }
     } else {
       return(readr::spec(header)$cols[[colname]])
