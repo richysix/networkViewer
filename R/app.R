@@ -19,10 +19,10 @@ myApp <- function(testing = FALSE, debug = FALSE) {
           sidebarPanel(
             # File upload
             h3("Graph Data:"),
-            uploadGraphInput("GraphData"),
+            uploadGraphInput("GraphData", testing = testing),
             # RNASeq upload
             h3("RNA-seq Data:"),
-            uploadRNASeqInput("rnaseqData")
+            shinyModules::uploadRNASeqInput("rnaseqData", testing = testing)
           ),
           mainPanel(
             # file output for testing
@@ -83,15 +83,6 @@ myApp <- function(testing = FALSE, debug = FALSE) {
   )
   server <- function(input, output, session) {
     options(shiny.maxRequestSize = 50*1024^2)
-    if (testing) {
-      output$testing_msgs <-
-        renderPrint({
-          glue::glue(
-            "In networkViewer app server function:\n",
-            "Bootstrap version is: ",
-            "{bslib::theme_version(shiny::getCurrentTheme())}")
-        })
-    }
 
     data_list <- uploadGraphServer(id = "GraphData", debug = debug)
     output$nodes <- renderTable(data_list$nodes()[1:5,])
