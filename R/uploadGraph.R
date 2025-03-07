@@ -16,11 +16,11 @@
 #'
 #' uploadGraphInput("GraphData")
 #'
-uploadGraphInput <- function(id) {
+uploadGraphInput <- function(id, testing = FALSE) {
   tagList(
     fileInput(NS(id, "nodesFile"), "Nodes File"),
     fileInput(NS(id, "edgesFile"), "Edges File"),
-    checkboxInput(NS(id, "testdata"), 'Use test data', value = FALSE, width = NULL)
+    checkboxInput(NS(id, "testdata"), 'Use test data', value = testing, width = NULL)
   )
 }
 
@@ -49,7 +49,7 @@ uploadGraphServer <- function(id, debug = FALSE) {
     observe({
       updateCheckboxInput(session, "testdata", value = FALSE)
     }) |>
-      bindEvent(input$nodesFile, input$edgesFile)
+      bindEvent(input$nodesFile, input$edgesFile, ignoreInit = TRUE)
 
     # return nodes file path depending on whether the test data checkbox is checked
     nodes_file <- reactive({
@@ -243,11 +243,11 @@ set_col_types <- function(data_file, readr_func, ...){
 #'
 #' @examples
 #' uploadGraphApp()
-uploadGraphApp <- function(debug = FALSE) {
+uploadGraphApp <- function(testing = FALSE, debug = FALSE) {
   ui <- fluidPage(
     sidebarLayout(
       sidebarPanel(
-        uploadGraphInput("GraphData")
+        uploadGraphInput("GraphData", testing = testing)
       ),
       mainPanel(
         tableOutput("nodes"),
@@ -256,7 +256,7 @@ uploadGraphApp <- function(debug = FALSE) {
     )
   )
   server <- function(input, output, session) {
-    data_list <- uploadGraphServer("GraphData", debug)
+    data_list <- uploadGraphServer("GraphData", debug = debug)
     output$nodes <- renderTable(data_list$nodes()[1:5,])
     output$edges <- renderTable(data_list$edges()[1:5,])
   }
