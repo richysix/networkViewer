@@ -154,9 +154,8 @@ create_overview_edges <- function(nodes, edges) {
     }
   ) |>
     purrr::list_rbind() |>
-    dplyr::mutate(
-      edge_idx = seq_along(source)
-    )
+    dplyr::filter(weight > 0) |>
+    dplyr::mutate(edge_idx = seq_along(source))
 }
 
 # Function to count the edges from one cluster to another
