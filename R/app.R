@@ -36,6 +36,22 @@ myApp <- function(testing = FALSE, debug = FALSE) {
         )
       ),
       tabPanel(
+        "Network Overview",
+        page_fillable(
+          networkOverviewOutput("network_overview"),
+          layout_columns(
+            card(
+              card_header("Network overview (clusters)"),
+              DT::dataTableOutput("cl_nodes"),
+            ),
+            card(
+              card_header("Network overview (connections)"),
+              DT::dataTableOutput("cl_edges")
+            )
+          )
+        )
+      ),
+      tabPanel(
         "Cluster View",
         page_fillable(
           subsetGraphInput("cluster_closeup"),
@@ -80,6 +96,16 @@ myApp <- function(testing = FALSE, debug = FALSE) {
     data_list <- uploadGraphServer(id = "GraphData", debug = debug)
     output$nodes <- renderTable(data_list$nodes()[1:5,])
     output$edges <- renderTable(data_list$edges()[1:5,])
+
+    # Overview
+    overview_list <- networkOverviewServer(
+      "network_overview",
+      nodes = data_list$nodes,
+      edges = data_list$edges,
+      debug
+    )
+    output$cl_nodes <- DT::renderDataTable(overview_list$overview_nodes())
+    output$cl_edges <- DT::renderDataTable(overview_list$overview_edges())
 
     # Cluster View
     subset_list <- subsetGraphServer(
