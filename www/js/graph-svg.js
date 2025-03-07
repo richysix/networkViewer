@@ -1,9 +1,14 @@
-// !preview r2d3 data = jsonlite::read_json("www/js/test-graph.json"), d3_version = 6, css = "www/css/graph.css"
+// !preview r2d3 data = jsonlite::read_json("www/js/test-graph.json"), d3_version = 6, css = "www/css/graph.css", options = list(use_size = TRUE, use_weight = TRUE, scale_weights = FALSE, colour_nodes = TRUE)
 
 const testing = false;
 const debug = true;
-let radius = 10;
-const scale = d3.scaleOrdinal(d3.schemeTableau10);
+const radius = 10;
+const min_node_size = 10;
+const max_node_size = 40;
+const node_colour_scale = d3.scaleOrdinal(d3.schemeTableau10);
+
+// Add options to automatically colour nodes, change size of nodes and
+// width of stroke of links
 
 r2d3.onRender(function(graph, svg, width, height, options) {
     // Define the div for the tooltip
@@ -22,6 +27,20 @@ r2d3.onRender(function(graph, svg, width, height, options) {
         .enter().append("line")
           .attr("stroke-width", 2);
 
+    // scale for link weights
+    const link_scale = d3.scaleLinear(
+        [ 0, Math.max(...graph.edges.map(d => d.weight)) ],
+        [ 0, 1 ]
+    );
+    if (options.scale_weights) {
+      graph.edges.forEach(d => {
+        d.weight = link_scale(d.weight);
+      });
+    }
+    if (options.use_weight) {
+      links.attr("stroke-width", d => d.weight*20);
+    }
+
     //draw circles for the nodes
     const node_unselected_color = "#eeeeee";
     const nodes = svg.append("g")
@@ -35,11 +54,15 @@ r2d3.onRender(function(graph, svg, width, height, options) {
         .attr("cy", height / 2)
         .attr("fill",
             function(d) {
+              if (options.colour_nodes) {
+                return node_colour_scale(d.cluster_id);
+              } else {
                 if (d.cluster_id == 1) {
-                    return scale(d.cluster_id);
+                    return node_colour_scale(d.cluster_id);
                 } else {
                     return node_unselected_color;
                 }
+              }
             })
         // .attr("fill", function(d) { return color(d.cluster_id); })
         .attr("stroke", "#333333")
@@ -48,6 +71,17 @@ r2d3.onRender(function(graph, svg, width, height, options) {
           .on("drag", dragged)
           .on("end", dragended))
           .on("click", colour_cluster);
+
+    // scale for node size
+    const node_size_scale =
+      d3.scaleSqrt(
+        [ Math.min(...graph.nodes.map(d => d.size)), Math.max(...graph.nodes.map(d => d.size)) ],
+        [ min_node_size, max_node_size ]
+      );
+    // set size of nodes if using
+    if (options.use_size) {
+      nodes.attr("r", d => node_size_scale(d.size) ?? 10);
+    }
 
     function dragstarted(event, d) {
         if (debug) {
@@ -73,7 +107,7 @@ r2d3.onRender(function(graph, svg, width, height, options) {
         event.subject.fy = null;
         if (d3.select(this).classed("selected")) {
             d3.select(this)
-                .attr("fill", scale(d.cluster_id));
+                .attr("fill", node_colour_scale(d.cluster_id));
         } else {
             d3.select(this)
                 .attr("fill", node_unselected_color);
@@ -82,8 +116,11 @@ r2d3.onRender(function(graph, svg, width, height, options) {
     }
 
     const simulation = d3.forceSimulation()
-      .force("link", d3.forceLink().id(function(d) { return d.node_idx; }))
-      .force("charge", d3.forceManyBody())
+      .force("link",
+        d3.forceLink().id(function(d) { return d.node_idx; })
+          .strength((d) => d.weight))
+      .force("charge", d3.forceManyBody().strength(-100))
+      .force("collision", d3.forceCollide((d) => d.size))
       .force("center", d3.forceCenter(width / 2, height / 2));
 
     simulation
@@ -122,7 +159,7 @@ r2d3.onRender(function(graph, svg, width, height, options) {
             } else {
                 svg.selectAll("circle")
                 .filter(function(d){ return d.cluster_id ==  cluster_idx ? this : null; })
-                .attr("fill", scale(d.cluster_id))
+                .attr("fill", node_colour_scale(d.cluster_id))
                 .each(function(){ this.classList.toggle("selected"); });
             }
         }
