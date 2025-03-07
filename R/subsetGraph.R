@@ -97,6 +97,12 @@ subsetGraphServer <- function(id, nodes = NULL, edges = NULL, debug = FALSE) {
       "cluster_subset_graph",
       nodes = nodes_subset,
       edges = edges_subset,
+      d3_options = list(
+        "use_size" = FALSE,
+        "use_weight" = TRUE,
+        "scale_weights" = FALSE,
+        "colour_nodes" = TRUE
+      ),
       debug = debug
     )
 
