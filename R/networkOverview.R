@@ -73,6 +73,7 @@ networkOverviewServer <- function(id, nodes = NULL, edges = NULL, debug = FALSE)
         "use_size" = TRUE,
         "use_weight" = TRUE,
         "scale_weights" = TRUE,
+        "weights_scale_factor" = 20,
         "colour_nodes" = TRUE
       ),
       debug = debug

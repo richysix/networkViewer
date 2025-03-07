@@ -1,4 +1,4 @@
-// !preview r2d3 data = jsonlite::read_json("www/js/test-graph.json"), d3_version = 6, css = "www/css/graph.css", options = list(use_size = TRUE, use_weight = TRUE, scale_weights = FALSE, colour_nodes = TRUE)
+// !preview r2d3 data = jsonlite::read_json("www/js/test-graph.json"), d3_version = 6, css = "www/css/graph.css", options = list(use_size = TRUE, use_weight = TRUE, scale_weights = FALSE, weights_scale_factor = 10, colour_nodes = TRUE)
 
 const testing = false;
 const debug = true;
@@ -32,13 +32,14 @@ r2d3.onRender(function(graph, svg, width, height, options) {
         [ 0, Math.max(...graph.edges.map(d => d.weight)) ],
         [ 0, 1 ]
     );
+    const weights_scale_factor = options.weights_scale_factor ?? 10;
     if (options.scale_weights) {
       graph.edges.forEach(d => {
         d.weight = link_scale(d.weight);
       });
     }
     if (options.use_weight) {
-      links.attr("stroke-width", d => d.weight*20);
+      links.attr("stroke-width", d => d.weight*weights_scale_factor);
     }
 
     //draw circles for the nodes

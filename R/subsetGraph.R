@@ -101,6 +101,7 @@ subsetGraphServer <- function(id, nodes = NULL, edges = NULL, debug = FALSE) {
         "use_size" = FALSE,
         "use_weight" = TRUE,
         "scale_weights" = FALSE,
+        "weights_scale_factor" = 10,
         "colour_nodes" = TRUE
       ),
       debug = debug
