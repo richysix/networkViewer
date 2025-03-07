@@ -22,12 +22,12 @@ subsetGraphInput <- function(id) {
 
 #' Create output components to display graph subset
 #'
-#' `subsetGraphOutput()` produces a output for a networkD3Output
+#' `subsetGraphOutput()` produces a output for a graphD3Output
 #'
 #' @param id namespace id for the UI components. Must match the id provided to the
 #' [subsetGraphServer()] function.
 #'
-#' @returns a [htmltools::tagList()] containing a [networkD3Output()]
+#' @returns a [htmltools::tagList()] containing a [graphD3Output()]
 #'
 #' @export
 #'
@@ -50,8 +50,8 @@ subsetGraphOutput <- function(id) {
 #' [subsetGraphInput()] function.
 #'
 #' @returns a list containing two [shiny::reactive()] objects
-#' * sampleInfo a data.frame of sample metadata
-#' * counts a data.frame of RNAseq count data
+#' * nodes_subset a data.frame of nodes
+#' * edges_subset a data.frame of edges
 #'
 #' @export
 #'
