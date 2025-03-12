@@ -106,9 +106,9 @@ subsetGraphServer <- function(id, nodes = NULL, edges = NULL, debug = FALSE) {
       edges = edges_subset,
       d3_options = list(
         "use_size" = FALSE,
-        "use_weight" = TRUE,
+        "use_weight_as_stroke" = TRUE,
         "scale_weights" = FALSE,
-        "weights_scale_factor" = 10,
+        "stroke_scale_factor" = 10,
         "colour_nodes" = TRUE
       ),
       debug = debug

@@ -134,8 +134,9 @@ graphD3Server <- function(id, nodes = NULL, edges = NULL, d3_options = NULL, deb
 #'
 #' @examples
 #' graphD3App()
-graphD3App <- function(debug = TRUE, use_size = FALSE, use_weight = FALSE,
-                       scale_weights = FALSE, colour_nodes = FALSE) {
+graphD3App <- function(debug = TRUE, use_size = FALSE, use_weight_as_stroke = FALSE,
+                       scale_weights = FALSE, stroke_scale_factor = 10,
+                       colour_nodes = FALSE) {
   ui <- fluidPage(
     graphD3Input("graph", strength_params = list(width = "100%"),
                  distance_params = list(value = 150)),
@@ -151,9 +152,10 @@ graphD3App <- function(debug = TRUE, use_size = FALSE, use_weight = FALSE,
       nodes = reactive(node_data),
       edges = reactive(edge_data),
       d3_options = list("use_size" = use_size,
-                        "use_weight" = use_weight,
+                        "use_weight_as_stroke" = use_weight_as_stroke,
                         "scale_weights" = scale_weights,
-                        "colour_nodes" = colour_nodes),
+                        "colour_nodes" = colour_nodes,
+                        "stroke_scale_factor" = stroke_scale_factor),
       debug
     )
   }

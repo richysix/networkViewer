@@ -1,20 +1,22 @@
-// !preview r2d3 data = jsonlite::read_json("www/js/test-graph.json"), d3_version = 6, css = "www/css/graph.css", options = list(use_size = TRUE, use_weight = TRUE, scale_weights = FALSE, weights_scale_factor = 10, colour_nodes = TRUE)
+// !preview r2d3 data = jsonlite::read_json("www/js/test-graph.json"), d3_version = 6, css = "www/css/graph.css", options = list(debug = TRUE, use_size = FALSE, use_weight_as_stroke = TRUE, stroke_scale_factor = 10, scale_weights = TRUE, colour_nodes = TRUE, charge_strength = -100, link_distance = 50)
 
 const testing = false;
-const debug = true;
 const radius = 10;
 const min_node_size = 10;
 const max_node_size = 40;
 const node_colour_scale = d3.scaleOrdinal(d3.schemeTableau10);
 
-// Add options to automatically colour nodes, change size of nodes and
-// width of stroke of links
-
 r2d3.onRender(function(graph, svg, width, height, options) {
-    // Define the div for the tooltip
-    // var tooltip_div = svg.append("div")
-    //     .attr("class", "tooltip")
-    //     .style("opacity", 1);
+    // set defaults for options
+    const debug = options.debug == undefined ? false : options.debug;
+    const use_size = options.use_size == undefined ? false : options.use_size;
+    const use_weight_as_stroke = options.use_weight_as_stroke == undefined ? false : options.use_weight_as_stroke;
+    const stroke_scale_factor = options.stroke_scale_factor == undefined ? 10 : options.stroke_scale_factor;
+    const scale_weights = options.scale_weights == undefined ? false : options.scale_weights;
+    const colour_nodes = options.colour_nodes == undefined ? false : options.colour_nodes;
+    const charge_strength = options.charge_strength == undefined ? -100 : options.charge_strength;
+    const link_distance = options.link_distance == undefined ? false : options.link_distance;
+    const link_strength = options.link_strength == undefined ? false : options.link_strength;
 
     // First remove all previous elements
     svg.selectAll("g").remove();
@@ -32,14 +34,13 @@ r2d3.onRender(function(graph, svg, width, height, options) {
         [ 0, Math.max(...graph.edges.map(d => d.weight)) ],
         [ 0, 1 ]
     );
-    const weights_scale_factor = options.weights_scale_factor ?? 10;
-    if (options.scale_weights) {
+    if (scale_weights) {
       graph.edges.forEach(d => {
         d.weight = link_scale(d.weight);
       });
     }
-    if (options.use_weight) {
-      links.attr("stroke-width", d => d.weight*weights_scale_factor);
+    if (use_weight_as_stroke) {
+      links.attr("stroke-width", d => d.weight*stroke_scale_factor);
     }
 
     //draw circles for the nodes
@@ -55,7 +56,7 @@ r2d3.onRender(function(graph, svg, width, height, options) {
         .attr("cy", height / 2)
         .attr("fill",
             function(d) {
-              if (options.colour_nodes) {
+              if (colour_nodes) {
                 return node_colour_scale(d.cluster_id);
               } else {
                 if (d.cluster_id == 1) {
@@ -80,15 +81,15 @@ r2d3.onRender(function(graph, svg, width, height, options) {
         [ min_node_size, max_node_size ]
       );
     // set size of nodes if using
-    if (options.use_size) {
+    if (use_size) {
       nodes.attr("r", d => node_size_scale(d.size) ?? 10);
     }
 
     function dragstarted(event, d) {
         if (debug) {
-            console.log(d);
-            console.log(this);
-            console.log(event);
+          if (d.gene_name != undefined) {
+            console.log(d.gene_name);
+          }
         }
         d3.select(this)
             .raise()
@@ -138,11 +139,10 @@ r2d3.onRender(function(graph, svg, width, height, options) {
         .attr("cy", function(d) { return Math.max(radius, Math.min(height - radius, d.y)); });
 
       links
-          .attr("x1", function(d) { return d.source.x; })
-          .attr("y1", function(d) { return d.source.y; })
-          .attr("x2", function(d) { return d.target.x; })
-          .attr("y2", function(d) { return d.target.y; });
-
+        .attr("x1", function(d) { return d.source.x; })
+        .attr("y1", function(d) { return d.source.y; })
+        .attr("x2", function(d) { return d.target.x; })
+        .attr("y2", function(d) { return d.target.y; });
     }
 
     // Colours

@@ -95,9 +95,9 @@ networkOverviewServer <- function(id, nodes = NULL, edges = NULL, debug = FALSE)
       edges = overview_edges,
       d3_options = list(
         "use_size" = TRUE,
-        "use_weight" = TRUE,
+        "use_weight_as_stroke" = TRUE,
         "scale_weights" = TRUE,
-        "weights_scale_factor" = 20,
+        "stroke_scale_factor" = 10,
         "colour_nodes" = TRUE
       ),
       debug = debug

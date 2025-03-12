@@ -38,6 +38,13 @@ myApp <- function(testing = FALSE, debug = FALSE) {
       tabPanel(
         "Network Overview",
         page_fillable(
+          accordion(
+            accordion_panel(
+              title = "Network layout controls",
+              networkOverviewInput("network_overview"),
+            ),
+            open = FALSE
+          ),
           networkOverviewOutput("network_overview"),
           layout_columns(
             card(
