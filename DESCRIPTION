@@ -1,6 +1,6 @@
-Package: NetworkViewer
+Package: networkViewer
 Title: Shiny app for viewing networks
-Version: 0.0.0.9000
+Version: 0.0.0.9001
 Authors@R: 
     person("Richard", "White", email = "rich@bushclab.org", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0003-1842-412X"))

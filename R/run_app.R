@@ -20,12 +20,12 @@ run_netView_app <- function(dir = NULL) {
 
   } else if (interactive()) {
 
-    runApp(appDir = system.file("app",
+    runApp(appDir = system.file("net_view_app",
                                 package = "networkViewer"))
 
   } else {
 
-    shinyAppDir(appDir = system.file("app",
+    shinyAppDir(appDir = system.file("net_view_app",
                                      package = "networkViewer"))
 
   }

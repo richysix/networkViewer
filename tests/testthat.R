@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(NetworkViewer)
+library(networkViewer)
 
-test_check("NetworkViewer")
+test_check("networkViewer")
