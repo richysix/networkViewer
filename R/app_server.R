@@ -1,6 +1,9 @@
 #' Server function for the networkViewer app
 app_server <- function(input, output, session) {
   options(shiny.maxRequestSize = 50*1024^2)
+  # get options
+  testing <- shiny::getShinyOption("testing", default = FALSE)
+  debug   <- shiny::getShinyOption("debug", default = FALSE)
 
   data_list <- uploadGraphServer(id = "GraphData", debug = debug)
   output$nodes <- renderTable(data_list$nodes()[1:5,])

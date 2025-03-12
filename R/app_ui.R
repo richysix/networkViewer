@@ -1,5 +1,7 @@
 #' UI for the advancedShiny app
-app_ui <- function(testing = FALSE) {
+app_ui <- function() {
+  testing <- shiny::getShinyOption("testing", default = FALSE)
+
   bslib::page_fluid(
     tags$head(
       tags$link(rel = "stylesheet", type = "text/css", href = "css/graph.css")
