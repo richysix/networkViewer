@@ -31,8 +31,8 @@ r2d3.onRender(function(graph, svg, width, height, options) {
 
     // scale for link weights
     const link_scale = d3.scaleLinear(
-        [ 0, Math.max(...graph.edges.map(d => d.weight)) ],
-        [ 0, 1 ]
+        [ Math.min(...graph.edges.map(d => d.weight)), Math.max(...graph.edges.map(d => d.weight)) ],
+        [ 0.1, 1 ]
     );
     if (scale_weights) {
       graph.edges.forEach(d => {
