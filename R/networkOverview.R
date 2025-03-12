@@ -1,3 +1,27 @@
+#' Create UI components to display a graph
+#'
+#' `networkOverviewInput()` produces controls to alter how the visualisation works
+#'
+#' @param id namespace id for the UI components. Must match the id provided to the
+#' [networkOverviewServer()] function.
+#'
+#' @returns a [htmltools::tagList()] containing a [shiny::sliderInput()] and
+#' a [shiny::actionButton()] to update the parameters
+#' any changes only take effect once the button has been clicked so that the
+#' simulation is not constantly recalculating
+#'
+#' @export
+#'
+#' @examples
+#'
+#' networkOverviewInput("graph")
+#'
+networkOverviewInput <- function(id, ...) {
+  tagList(
+    graphD3Input(NS(id, "network_overview_graph"), ...)
+  )
+}
+
 #' Create output components to display graph subset
 #'
 #' `networkOverviewOutput()` produces an output for a graphD3Output
@@ -177,6 +201,12 @@ count_edges <- function(cluster_id1, cluster_id2, nodes, edges) {
 #' networkOverviewApp()
 networkOverviewApp <- function(debug = TRUE) {
   ui <- fluidPage(
+      networkOverviewInput(
+        "overview",
+        strength_params = list(
+          width = "60%",
+          min = -100, max = 0, step = 1, value = -50
+        )),
       networkOverviewOutput("overview"),
       DT::dataTableOutput("nodes"),
       DT::dataTableOutput("edges")

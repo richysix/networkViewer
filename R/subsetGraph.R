@@ -14,8 +14,15 @@
 #'
 #' subsetGraphInput("GraphData")
 #'
-subsetGraphInput <- function(id) {
+subsetGraphInput <- function(id, ...) {
   tagList(
+    accordion(
+      accordion_panel(
+        title = "Network layout controls",
+        graphD3Input(NS(id, "cluster_subset_graph"), ...),
+      ),
+      open = FALSE
+    ),
     selectInput(NS(id, "cluster_num_select"), "Cluster: ", choices = NULL)
   )
 }
@@ -126,9 +133,24 @@ subsetGraphServer <- function(id, nodes = NULL, edges = NULL, debug = FALSE) {
 #' subsetGraphApp()
 subsetGraphApp <- function(debug = TRUE) {
   ui <- fluidPage(
+    theme = bslib::bs_theme(bootswatch = "cosmo"),
     sidebarLayout(
       sidebarPanel(
-        subsetGraphInput("cluster_subset")
+        subsetGraphInput("cluster_subset",
+                         strength_params = list(
+                           width = "100%",
+                           min = -100,
+                           max = 20,
+                           step = 20,
+                           value = -100
+                         ),
+                         distance_params = list(
+                           width = "100%",
+                           min = 10,
+                           max = 100,
+                           step = 5,
+                           value = 50
+                         ))
       ),
       mainPanel(
         subsetGraphOutput("cluster_subset"),

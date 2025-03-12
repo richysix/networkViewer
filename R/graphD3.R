@@ -1,4 +1,51 @@
-#' Create UI components to upload node and edges files for a graph
+#' Create UI components to display a graph
+#'
+#' `graphD3Input()` produces controls to alter how the visualisation works
+#'
+#' @param id namespace id for the UI components. Must match the id provided to the
+#' [graphD3Server()] function.
+#'
+#' @returns a [htmltools::tagList()] containing a [shiny::sliderInput()] and
+#' a [shiny::actionButton()] to update the parameters
+#' any changes only take effect once the button has been clicked so that the
+#' simulation is not constantly recalculating
+#'
+#' @export
+#'
+#' @examples
+#'
+#' graphD3Input("graph")
+#'
+graphD3Input <- function(id, strength_params = list(), distance_params = list()) {
+  strength_defaults <- list(width = "50%", min = -100, max = 100,
+                            step = 20, value = -100)
+  strength_defaults <- modifyList(strength_defaults, strength_params)
+  distance_defaults <- list(width = "50%", min = 10, max = 200,
+                            step = 10, value = 100)
+  distance_defaults <- modifyList(distance_defaults, distance_params)
+  tagList(
+    shiny::sliderInput(
+      inputId = NS(id, "charge_strength"),
+      label = "Charge Strength",
+      width = strength_defaults$width,
+      min = strength_defaults$min, max = strength_defaults$max,
+      step = strength_defaults$step, value = strength_defaults$value,
+    ),
+    shiny::sliderInput(
+      inputId = NS(id, "link_distance"),
+      label = "Link Distance",
+      width = distance_defaults$width,
+      min = distance_defaults$min, max = distance_defaults$max,
+      step = distance_defaults$step, value = distance_defaults$value,
+    ),
+    shiny::actionButton(
+      inputId = NS(id, "update_params"),
+      label = "Update simulation parameters"
+    )
+  )
+}
+
+#' Create UI components to display a graph
 #'
 #' `graphD3Output()` produces a d3 network visualisation of input data
 #'
@@ -43,21 +90,31 @@ graphD3Server <- function(id, nodes = NULL, edges = NULL, d3_options = NULL, deb
   stopifnot(!is.reactive(d3_options))
 
   moduleServer(id, function(input, output, session) {
+    sim_params <- reactive({
+      if (input$update_params > 0) {
+        params <- d3_options
+        params$charge_strength <- isolate(input$charge_strength)
+        params$link_distance <- isolate(input$link_distance)
+      } else {
+        params <- d3_options
+      }
+      params$debug <- debug
+      return(params)
+    }) |> bindEvent(input$update_params, ignoreNULL = FALSE)
+
     output$d3_graph <- renderD3({
-      req(nodes())
-      req(edges())
+      req(nodes(), edges(), sim_params())
       if (debug) {
         print(head(nodes()))
         print(head(edges()))
       }
-
       r2d3(
         data = list("nodes" = jsonlite::toJSON(nodes()),
                     "edges" = jsonlite::toJSON(edges())),
         script = file.path(here::here(), "www", "js", "graph-svg.js"),
         css = file.path(here::here(), "www", "css", "graph.css"),
         d3_version = "6",
-        options = d3_options,
+        options = sim_params(),
         # this does not work
         sizing = htmlwidgets::sizingPolicy(
           # padding = 0, browser.fill = TRUE,
@@ -80,7 +137,9 @@ graphD3Server <- function(id, nodes = NULL, edges = NULL, d3_options = NULL, deb
 graphD3App <- function(debug = TRUE, use_size = FALSE, use_weight = FALSE,
                        scale_weights = FALSE, colour_nodes = FALSE) {
   ui <- fluidPage(
-        graphD3Output("graph")
+    graphD3Input("graph", strength_params = list(width = "100%"),
+                 distance_params = list(value = 150)),
+    graphD3Output("graph")
   )
   server <- function(input, output, session) {
     node_data <- readr::read_rds(file.path(here::here(), "tests", "testthat",
