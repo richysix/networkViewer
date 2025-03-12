@@ -119,10 +119,12 @@ r2d3.onRender(function(graph, svg, width, height, options) {
 
     const simulation = d3.forceSimulation()
       .force("link",
-        d3.forceLink().id(function(d) { return d.node_idx; })
-          .strength((d) => d.weight))
-      .force("charge", d3.forceManyBody().strength(-100))
-      .force("collision", d3.forceCollide((d) => d.size))
+        d3.forceLink()
+          .id(function(d) { return d.node_idx; })
+          .distance(link_distance)
+          .strength(d => d.weight))
+      .force("charge", d3.forceManyBody().strength(charge_strength))
+      //.force("collision", d3.forceCollide((d) => d.r/2))
       .force("center", d3.forceCenter(width / 2, height / 2));
 
     simulation
